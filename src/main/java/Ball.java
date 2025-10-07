@@ -20,7 +20,5 @@ public class Ball extends Moveable {
         ellipse2D.setFrame(x, y, width, height);
         g2d.setColor(this.getColor());
         g2d.fill(ellipse2D);
-        g2d.setColor(Color.red);
-        g2d.draw(this);
     }
 }

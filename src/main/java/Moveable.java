@@ -8,6 +8,8 @@ public abstract class Moveable extends Rectangle2D.Double{
     private double ay;
     private Color color;
 
+    public Moveable() {}
+
     private void setStats(double vx, double vy, double ax, double ay, Color color){
         this.vx = vx;
         this.vy = vy;
@@ -16,7 +18,7 @@ public abstract class Moveable extends Rectangle2D.Double{
         this.color = color;
     }
 
-    private final double GRAVITY = 2;
+    static final double GRAVITY = 2;
 
     public Moveable(double x, double y,double vx, double vy, double ax, double ay, double size, Color color) {
         super(x, y, size, size);

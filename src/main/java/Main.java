@@ -27,6 +27,7 @@ public class Main extends JFrame{
             }
         });
         pack();
+        gamePanel.requestFocus();
     }
 
     public static void main(String[] args) {

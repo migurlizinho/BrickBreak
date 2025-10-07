@@ -1,10 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Vector;
+import java.util.function.Consumer;
 
-public class GamePanel extends JComponent {
-
+public class GamePanel extends JComponent implements KeyListener {
     private Graphics2D g2;
     private BufferedImage image;
     private int width;
@@ -17,24 +20,28 @@ public class GamePanel extends JComponent {
 
     private final double GRAVITY = 2;
 
+    private Vector<Moveable> moveables;
+    private Vector<Controlable> controlables;
+
     public GamePanel(int width, int height){
         this.width = width;
         this.height = height;
         setPreferredSize(new Dimension(width, height));
     }
 
-    private Ball b1;
-    private Triangle t1;
-
     public void start(){
+        setFocusable(true);
+        addKeyListener(this);
         image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         g2 = image.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
-        double s1 = 200;
-        b1 = new Ball((width / 2) - s1/2, 100, 0, 0, 0, GRAVITY, s1, Color.ORANGE);
-        t1 = new Triangle(new Rectangle2D.Double((width / 2), 100, s1, s1), Color.ORANGE);
+        moveables = new Vector<>();
+        controlables = new Vector<>();
+
+        double s1 = 75;
+        moveables.add(new Ball((width / 2) - s1/2, 100, 0, 0, 0, GRAVITY, s1, Color.ORANGE));
 
         thread = new Thread(new Runnable() {
             @Override
@@ -61,10 +68,13 @@ public class GamePanel extends JComponent {
     }
 
     private void drawGame(){
-        t1.move(0, 0, width, height);
-        t1.paint(g2);
-        b1.move(0 , 0, width, height);
-        b1.paint(g2);
+        moveables.forEach(new Consumer<Moveable>() {
+            @Override
+            public void accept(Moveable moveable) {
+                moveable.move(0, 0, width, height);
+                moveable.paint(g2);
+            }
+        });
     }
 
     private void render(){
@@ -92,7 +102,32 @@ public class GamePanel extends JComponent {
                 ", start=" + start +
                 ", FPS=" + FPS +
                 ", TARGET_TIME=" + TARGET_TIME +
-                ", b1=" + b1 +
+                ", moveables=" + moveables +
+                ", controlables=" + controlables +
                 '}';
     }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_W:
+                System.out.println("Pressed W");
+                break;
+            case KeyEvent.VK_A:
+                System.out.println("Pressed A");
+                break;
+            case KeyEvent.VK_S:
+                System.out.println("Pressed S");
+                break;
+            case KeyEvent.VK_D:
+                System.out.println("Pressed D");
+                break;
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    @Override
+    public void keyReleased(KeyEvent e) {}
 }
