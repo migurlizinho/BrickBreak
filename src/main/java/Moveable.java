@@ -1,7 +1,7 @@
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
-public abstract class Moveable extends Rectangle2D.Double{
+public abstract class Moveable extends Rectangle2D.Double implements Paintable{
     private double vx;
     private double vy;
     private double ax;
@@ -88,8 +88,6 @@ public abstract class Moveable extends Rectangle2D.Double{
     public String toString() {
         return "pos(" + x + "," + y + ")" + " vel(" + vx + "," + vy + ")" + " acc(" + ax + "," + ay + ")";
     }
-
-    public abstract void paint(Graphics2D g2d);
 
     public void collisions(Rectangle2D.Double other){
         Rectangle2D.Double result = new Rectangle2D.Double();

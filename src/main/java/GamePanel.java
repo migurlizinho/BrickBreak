@@ -10,17 +10,17 @@ import java.util.function.Consumer;
 public class GamePanel extends JComponent implements KeyListener {
     private Graphics2D g2;
     private BufferedImage image;
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
     private Thread thread;
-    private boolean start = true;
+    private final boolean start = true;
 
-    private final int FPS = 60;
-    private final int TARGET_TIME = 1000000000/FPS;
+    private static final int FPS = 60;
+    private static final int TARGET_TIME = 1000000000/FPS;
 
-    private final double GRAVITY = 2;
+    private final static double GRAVITY = 2;
 
-    private Vector<Moveable> moveables;
+    private Vector<Moveable> movables;
     private Vector<Controlable> controlables;
 
     public GamePanel(int width, int height){
@@ -37,18 +37,23 @@ public class GamePanel extends JComponent implements KeyListener {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
-        moveables = new Vector<>();
+        movables = new Vector<>();
         controlables = new Vector<>();
 
         double s1 = 75;
-        moveables.add(new Ball((width / 2) - s1/2, 100, 0, 0, 0, GRAVITY, s1, Color.ORANGE));
+        //moveables.add(new Ball((width / 2) - s1/2, 100, 0, 0, 0, GRAVITY, s1, Color.ORANGE));
+
+        Racket racket = new Racket(new Rectangle2D.Double((width / 2) - s1/2, 100, s1, s1), Color.ORANGE, false, 5, 5);
+        racket.addAction(KeyEvent.VK_W, Controlable.moveUp).addAction(KeyEvent.VK_A, Controlable.moveLeft)
+                .addAction(KeyEvent.VK_S, Controlable.moveDown).addAction(KeyEvent.VK_D, Controlable.moveRight);
+        controlables.add(racket);
 
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while(start){
                     long startTime = System.nanoTime();
-                    drawBrackground();
+                    drawBackground();
                     drawGame();
                     render();
                     long time = System.nanoTime() - startTime;
@@ -62,17 +67,24 @@ public class GamePanel extends JComponent implements KeyListener {
         thread.start();
     }
 
-    private void drawBrackground(){
+    private void drawBackground(){
         g2.setColor(Color.DARK_GRAY);
         g2.fillRect(0, 0, width, height);
     }
 
     private void drawGame(){
-        moveables.forEach(new Consumer<Moveable>() {
+        movables.forEach(new Consumer<Moveable>() {
             @Override
             public void accept(Moveable moveable) {
                 moveable.move(0, 0, width, height);
                 moveable.paint(g2);
+            }
+        });
+        controlables.forEach(new Consumer<Controlable>() {
+            @Override
+            public void accept(Controlable controlable) {
+                controlable.move(0, 0, width, height);
+                controlable.paint(g2);
             }
         });
     }
@@ -102,32 +114,25 @@ public class GamePanel extends JComponent implements KeyListener {
                 ", start=" + start +
                 ", FPS=" + FPS +
                 ", TARGET_TIME=" + TARGET_TIME +
-                ", moveables=" + moveables +
+                ", moveables=" + movables +
                 ", controlables=" + controlables +
                 '}';
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_W:
-                System.out.println("Pressed W");
-                break;
-            case KeyEvent.VK_A:
-                System.out.println("Pressed A");
-                break;
-            case KeyEvent.VK_S:
-                System.out.println("Pressed S");
-                break;
-            case KeyEvent.VK_D:
-                System.out.println("Pressed D");
-                break;
+        for (Controlable controlable : controlables) {
+            controlable.runAction(e.getKeyCode());
         }
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {}
+    @Override public void keyTyped(KeyEvent e) {}
 
     @Override
-    public void keyReleased(KeyEvent e) {}
+    public void keyReleased(KeyEvent e) {
+        for (Controlable controlable : controlables) {
+            controlable.setVx(0);
+            controlable.setVy(0);
+        }
+    }
 }
